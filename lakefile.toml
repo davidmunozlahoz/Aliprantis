@@ -1,0 +1,15 @@
+name = "aliprantis"
+version = "0.1.0"
+defaultTargets = ["Aliprantis"]
+
+[[require]]
+name = "banLat"
+git = "git@github.com:davidmunozlahoz/banlat.git"
+rev = "master"
+
+[[lean_lib]]
+name = "Aliprantis"
+
+[[lean_exe]]
+name = "aliprantis"
+root = "Main"
