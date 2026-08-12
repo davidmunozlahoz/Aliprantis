@@ -4,7 +4,7 @@ defaultTargets = ["Aliprantis"]
 
 [[require]]
 name = "banLat"
-git = "git@github.com:davidmunozlahoz/banlat.git"
+git = "https://github.com/davidmunozlahoz/banlat.git"
 rev = "master"
 
 [[lean_lib]]
