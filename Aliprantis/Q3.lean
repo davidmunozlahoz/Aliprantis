@@ -622,78 +622,24 @@ theorem irrationalCompletionEquiv_map_sup
       simpa using hdense_left a
   exact congrFun hfun x
 
-theorem irrationalCompletionEquiv_map_inf
-    (x y : IrrationalPartitionFunctions) :
-    irrationalCompletionEquiv (x ⊓ y) =
-      irrationalCompletionEquiv x ⊓ irrationalCompletionEquiv y := by
-  have hcont_source : Continuous
-      (fun p : IrrationalPartitionFunctions × IrrationalPartitionFunctions =>
-        p.1 ⊓ p.2) :=
-    ((isLocallySolidVectorLattice_iff_uniformContinuous_inf
-      (E := IrrationalPartitionFunctions)).mp inferInstance).continuous
-  have hcont_target : Continuous
-      (fun p : Completion C(ℝ, ℝ) × Completion C(ℝ, ℝ) => p.1 ⊓ p.2) :=
-    Completion.continuous_map₂ continuous_fst continuous_snd
-  have hdense_left (a : C(ℝ, ℝ)) :
-      irrationalCompletionEquiv
-          (partitionRestriction irrationalSet a ⊓ y) =
-        (a : Completion C(ℝ, ℝ)) ⊓ irrationalCompletionEquiv y := by
-    have hfun :
-        (fun z => irrationalCompletionEquiv
-            (partitionRestriction irrationalSet a ⊓ z)) =
-          (fun z => (a : Completion C(ℝ, ℝ)) ⊓
-            irrationalCompletionEquiv z) := by
-      apply (partitionRestriction_denseRange ℝ irrationalSet).equalizer
-      · exact irrationalCompletionEquiv.continuous.comp
-          (hcont_source.comp (continuous_const.prodMk continuous_id))
-      · exact hcont_target.comp
-          (continuous_const.prodMk irrationalCompletionEquiv.continuous)
-      · funext b
-        change irrationalCompletionEquiv
-            (partitionRestriction irrationalSet a ⊓
-              partitionRestriction irrationalSet b) =
-          (a : Completion C(ℝ, ℝ)) ⊓
-            irrationalCompletionEquiv (partitionRestriction irrationalSet b)
-        rw [irrationalCompletionEquiv_partitionRestriction]
-        calc
-          irrationalCompletionEquiv
-              (partitionRestriction irrationalSet a ⊓
-                partitionRestriction irrationalSet b) =
-              irrationalCompletionEquiv
-                (partitionRestriction irrationalSet (a ⊓ b)) :=
-            congrArg irrationalCompletionEquiv
-              ((partitionRestriction irrationalSet).map_inf' a b).symm
-          _ = ((a ⊓ b : C(ℝ, ℝ)) : Completion C(ℝ, ℝ)) :=
-            irrationalCompletionEquiv_partitionRestriction _
-          _ = (a : Completion C(ℝ, ℝ)) ⊓
-              (b : Completion C(ℝ, ℝ)) :=
-            IsLocallySolidVectorLattice.toCompletionVecLatHom.map_inf' a b
-    exact congrFun hfun y
-  have hfun :
-      (fun z => irrationalCompletionEquiv (z ⊓ y)) =
-        (fun z => irrationalCompletionEquiv z ⊓
-          irrationalCompletionEquiv y) := by
-    apply (partitionRestriction_denseRange ℝ irrationalSet).equalizer
-    · exact irrationalCompletionEquiv.continuous.comp
-        (hcont_source.comp (continuous_id.prodMk continuous_const))
-    · exact hcont_target.comp
-        (irrationalCompletionEquiv.continuous.prodMk continuous_const)
-    · funext a
-      change irrationalCompletionEquiv
-          (partitionRestriction irrationalSet a ⊓ y) =
-        irrationalCompletionEquiv (partitionRestriction irrationalSet a) ⊓
-          irrationalCompletionEquiv y
-      simpa using hdense_left a
-  exact congrFun hfun x
-
 /-- The comparison of completions is also a vector-lattice equivalence. -/
 noncomputable def irrationalCompletionVecLatEquiv :
-    VecLatEquiv IrrationalPartitionFunctions (Completion C(ℝ, ℝ)) :=
-  { irrationalCompletionEquiv.toEquiv with
-    map_add' := irrationalCompletionEquiv_map_add
-    map_smul' := irrationalCompletionEquiv_map_smul
-    map_sup' := irrationalCompletionEquiv_map_sup
-    map_inf' := irrationalCompletionEquiv_map_inf }
+    VecLatEquiv IrrationalPartitionFunctions (Completion C(ℝ, ℝ)) := by
+  let e : IrrationalPartitionFunctions ≃ₗ[ℝ] Completion C(ℝ, ℝ) :=
+    { irrationalCompletionEquiv.toEquiv with
+      map_add' := irrationalCompletionEquiv_map_add
+      map_smul' := irrationalCompletionEquiv_map_smul }
+  have habs : ∀ x, e |x| = |e x| := by
+    intro x
+    change irrationalCompletionEquiv |x| = |irrationalCompletionEquiv x|
+    rw [abs, abs, irrationalCompletionEquiv_map_sup,
+      show -x = (-1 : ℝ) • x by simp,
+      irrationalCompletionEquiv_map_smul, neg_one_smul]
+  let hVecLatHom := VecLatHom.of_abs e.toLinearMap habs
+  exact
+    { e with
+      map_sup' := hVecLatHom.map_sup'
+      map_inf' := hVecLatHom.map_inf' }
 
 @[simp]
 theorem irrationalCompletionVecLatEquiv_apply

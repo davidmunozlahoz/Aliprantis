@@ -394,9 +394,7 @@ theorem continuous_ge_of_dense_of_mem_open
   obtain ⟨x, hxD, hxO⟩ := hD.exists_mem_open hO_open ⟨s, hsO⟩
   exact (not_lt_of_ge (hge x hxD hxO.1)) hxO.2
 
-/-- The second half of Lemma 5.3: density of both `P` and `C \ P` in the
-small Cantor set transfers positivity from the `P` component to the already
-vanishing complementary component. -/
+/-- The second half of Lemma 5.3: The second half of the proof of Lemma 5.3: the concrete limit vanishes on the component `P`.-/
 theorem concrete_limit_eq_zero_on_partition
     {I : Type*} [Preorder I] [IsDirected I (fun x y => x ≤ y)]
     [Nonempty I] {u : I → Q4Space} {g : Q4ConcreteCompletion}
