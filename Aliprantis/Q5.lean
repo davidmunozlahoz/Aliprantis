@@ -214,9 +214,11 @@ theorem no_positive_restriction_below_irrationalCharacteristic
     (hf_le : partitionRestriction irrationalSet f ≤
       irrationalCharacteristic) : False := by
   have hf_nonneg : 0 ≤ f := by
-    apply (partitionRestriction irrationalSet).le_of_map_le
-      (partitionRestriction_injective irrationalSet)
-    simpa using hf_pos.le
+    apply sup_eq_right.mp
+    apply partitionRestriction_injective irrationalSet
+    rw [map_sup (partitionRestriction irrationalSet) 0 f, map_zero]
+    apply sup_eq_right.mpr
+    exact hf_pos.le
   have hf_rat (q : ℚ) : f (q : ℝ) = 0 := by
     let qr : (irrationalSetᶜ : Set ℝ) := ⟨q, Rat.not_irrational q⟩
     have hle := (ContinuousMap.le_def.mp hf_le) (Sum.inr qr)
