@@ -2,7 +2,7 @@ import BanLat.LocallySolid.Completion
 import BanLat.LocallySolid.LocallyConvexSolid
 import BanLat.LocallySolid.WithSeminorms
 import BanLat.Examples.CofK.Basic
-import BanLat.LLexpr
+import BanLat.Operators.Hom
 import BanLat.Substructures.Ideal
 import Mathlib.Topology.Compactification.OnePoint.Basic
 import Mathlib.Topology.Maps.Basic
@@ -747,28 +747,28 @@ theorem lemma3_4 :
 
 namespace LatticeExpression
 
-theorem eval_zero_tuple_real {n : ℕ} (e : LLexpr n) :
-    LLexpr.eval (fun _ : Fin n => (0 : ℝ)) e = 0 := by
-  induction e <;> simp_all
+/-- Nonnegative scalar multiplication, bundled so that `LLexpr.map_eval` applies. -/
+private def nonnegSmulVecLatHom {X : Type*} [AddCommGroup X] [Lattice X]
+    [IsOrderedAddMonoid X] [VectorLattice X] (c : ℝ) (hc : 0 ≤ c) : VecLatHom X X where
+  toFun x := c • x
+  map_add' := smul_add c
+  map_smul' r x := by simp only [smul_smul, RingHom.id_apply, mul_comm]
+  map_sup' x y := nonneg_smul_sup x y c hc
+  map_inf' x y := nonneg_smul_inf x y c hc
 
+/-- Evaluation of an `LLexpr` is positively homogeneous in its input tuple. -/
 theorem eval_const_smul_of_nonneg_real {n : ℕ} (c : ℝ) (hc : 0 ≤ c)
     (v : Fin n → ℝ) (e : LLexpr n) :
     LLexpr.eval (fun i => c * v i) e = c * LLexpr.eval v e := by
-  induction e with
-  | zero => simp
-  | var i => rfl
-  | add e₁ e₂ h₁ h₂ => simp [h₁, h₂, mul_add]
-  | smul r e h =>
-      rw [LLexpr.eval_smul, h, LLexpr.eval_smul]
-      simp only [smul_eq_mul]
-      ring
-  | sup e₁ e₂ h₁ h₂ =>
-      rw [LLexpr.eval_sup, h₁, h₂, LLexpr.eval_sup]
-      exact (mul_max_of_nonneg _ _ hc).symm
-  | inf e₁ e₂ h₁ h₂ =>
-      rw [LLexpr.eval_inf, h₁, h₂, LLexpr.eval_inf]
-      exact (mul_min_of_nonneg _ _ hc).symm
+  simpa only [smul_eq_mul] using
+    (LLexpr.map_eval (nonnegSmulVecLatHom c hc) v e).symm
 
+/-- Every lattice-linear expression evaluates to zero on the zero tuple. -/
+theorem eval_zero_tuple_real {n : ℕ} (e : LLexpr n) :
+    LLexpr.eval (fun _ : Fin n => (0 : ℝ)) e = 0 := by
+  simpa using eval_const_smul_of_nonneg_real 0 le_rfl (fun _ : Fin n => 0) e
+
+/-- Evaluation of an `LLexpr` on a finite real tuple is continuous. -/
 theorem continuous_eval_real {n : ℕ} (e : LLexpr n) :
     Continuous (fun v : Fin n → ℝ => LLexpr.eval v e) := by
   induction e with
